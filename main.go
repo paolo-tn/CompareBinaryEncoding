@@ -8,6 +8,8 @@ import (
   "log"
   "github.com/vmihailenco/msgpack/v5"
   "github.com/hamba/avro/v2"
+  "github.com/thrift-iterator/go"
+  //"github.com/apache/thrift/lib/go/thrift"
  )
 
 type User struct {
@@ -22,10 +24,17 @@ type UserA struct {
   C []string `avro:"c"`
 }
 
+type UserThrift struct {
+  UserName string     `thrift:",1"`
+  FavoriteNumber int  `thrift:",2"`
+  Interests []string `thrift:",3"`
+}
+
+
 
 func main(){
   
-  fmt.Println("%s", "This is a simple demo of how serialization works with different protocols")
+  fmt.Println("This is a simple demo of how serialization works with different protocols")
   fmt.Println("It was inspired by book \"Designing Data Intensive Application by Martin Kleppmann - Chapter 4: Encoding and Evolution\"")  
   fmt.Println("")
   
@@ -101,13 +110,35 @@ func main(){
   
   fmt.Println("")
   
-  bAvro, err := avro.Marshal(schema, uA)
+  avroEncodedBytes, err := avro.Marshal(schema, uA)
   if err != nil{
     fmt.Println("error while marshalling with avro")
 		log.Fatal(err)
   }
-  fmt.Printf("Byte Array (AVRO) is %d long:\n\n%x",len(bAvro),bAvro)
+  fmt.Printf("Byte Array (AVRO) is %d long:\n\n%x",len(avroEncodedBytes),avroEncodedBytes)
  
+  fmt.Println("")
+  fmt.Println("")
+  
+  fmt.Println("4. Serialize object with Thrift Binary Protocol")
+  
+    //create an instance of the User object for thrifter
+  userThrift:= UserThrift{"Martin", 1337, []string{"daydreaming","hacking"}}
+  
+  thriftEncodedBytes, err := thrifter.Marshal(userThrift)
+  
+  if err != nil {
+    fmt.Println("error while marshalling with Thrift")
+		log.Fatal(err)
+  }
+  
+  fmt.Printf("Byte array (Thrifter Binary Protocol) is %d long:\n\n%x",len(thriftEncodedBytes),thriftEncodedBytes)
+
+  fmt.Println("")
+  fmt.Println("")
+  
+  //fmt.Println("5. Serialize object with Thrift Compact Protocol")
+
 }
 
 
